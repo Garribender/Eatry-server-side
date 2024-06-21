@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const JWT = require("jsonwebtoken");
 //register user
 const registerController = async (req, res) => {
     try {
@@ -21,7 +22,7 @@ if(!userName || !email || !password || !address || !phone){
 // validate existing user
 const existing = await userModel.findOne({ email })
 if(existing){
-    return res.staus(500).send({
+    return res.status(500).send({
         success:false,
         message:"Email already Registered please login"
         
@@ -45,7 +46,7 @@ res.status(201).send({
     user,
 });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send({
             success:false,
             message:"Error in Register Api",
@@ -66,7 +67,7 @@ const loginController = async (req, res) => {
             })
         }
         //check userr
-        const  user = await userModel.findOne({ email:email, password: password});
+        const  user = await userModel.findOne({ email:email, password: password });
         if(!user){
             return res.status(404).send({
                 success:false,
@@ -81,9 +82,16 @@ const loginController = async (req, res) => {
                 message:"invalid credentials",
             });
         }
+        //token
+        const token = JWT.sign({id:user._id}, process.env.JWT_SECRET, {
+             expiresIn: "5d",
+        })
+          
+        user.password = undefined; 
         res.status(200).send({
             success:true,
             message:"login successful",
+            token,
             user,
         })
     } catch (error) {
