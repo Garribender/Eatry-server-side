@@ -1,5 +1,5 @@
 const userModel = require("../models/userModel");
-
+const bcrypt = require("bcryptjs");
 //register user
 const registerController = async (req, res) => {
     try {
@@ -26,12 +26,16 @@ if(existing){
         message:"Email already Registered please login"
         
     })
-}     
+}    
+
+//hash password
+var salt = bcrypt.genSaltSync(10);
+const hashedPassword = await bcrypt.hash(password, salt)
 //create new user
 const user = await userModel.create({
     userName,
     email,
-    password,
+    password : hashedPassword,
     address,
     phone, 
 });
@@ -68,6 +72,14 @@ const loginController = async (req, res) => {
                 success:false,
                 message: "User not Found"
             })
+        }
+        //check user password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(500).send({
+                success:false,
+                message:"invalid credentials",
+            });
         }
         res.status(200).send({
             success:true,
