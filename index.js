@@ -24,6 +24,8 @@ app.use(morgan("dev"));
 //route
 app.use("/api/v1/test", require("./routes/testRoutes"));
 app.use("/api/v1/auth", require("./routes/authRoutes"));
+app.use("/api/v1/User", require("./routes/userRoutes"));
+
 
 app.listen(PORT, () => {
     console.log("server app is listening on port" .bgMagenta + PORT )
